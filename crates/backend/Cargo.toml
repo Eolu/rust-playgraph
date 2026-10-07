@@ -1,0 +1,18 @@
+[package]
+name = "playgraph-backend"
+description = "Compile-and-run service for rust-playgraph"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "playgraph-backend"
+path = "src/main.rs"
+
+[dependencies]
+playgraph-core = { path = "../core" }
+axum = "0.7"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "process", "time", "fs"] }
+tower-http = { version = "0.5", features = ["cors"] }
+serde.workspace = true
+serde_json.workspace = true

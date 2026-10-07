@@ -1,0 +1,7 @@
+[build]
+target = "crates/frontend/index.html"
+dist = "crates/frontend/dist"
+
+[serve]
+addresses = ["127.0.0.1"]
+port = 8080

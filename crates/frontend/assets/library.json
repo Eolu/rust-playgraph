@@ -1,0 +1,620 @@
+{
+  "groups": [
+    {
+      "name": "Debug & inspect",
+      "stages": [
+        {
+          "name": "Dbg",
+          "generics": "T",
+          "where_clause": "T: std::fmt::Debug",
+          "eval": "lazy",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "println!(\"{value:#?}\");\nvalue"
+        },
+        {
+          "name": "DbgLabel",
+          "generics": "T",
+          "where_clause": "T: std::fmt::Debug",
+          "eval": "lazy",
+          "inputs": [
+            { "name": "label", "type_name": "String" },
+            { "name": "value", "type_name": "T" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "println!(\"{label} = {value:#?}\");\nvalue"
+        },
+        {
+          "name": "Print",
+          "generics": "T",
+          "where_clause": "T: std::fmt::Debug",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "body": "println!(\"{value:?}\");"
+        },
+        {
+          "name": "PrintPretty",
+          "generics": "T",
+          "where_clause": "T: std::fmt::Debug",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "body": "println!(\"{value:#?}\");"
+        },
+        {
+          "name": "ToDebugString",
+          "generics": "T",
+          "where_clause": "T: std::fmt::Debug",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "outputs": [{ "name": "out", "type_name": "String" }],
+          "body": "format!(\"{value:#?}\")"
+        },
+        {
+          "name": "Discard",
+          "generics": "T",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "body": ""
+        },
+        {
+          "name": "Panic",
+          "generics": "T",
+          "where_clause": "T: std::fmt::Debug",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "body": "panic!(\"{value:#?}\");"
+        }
+      ]
+    },
+    {
+      "name": "Generic tools",
+      "stages": [
+        {
+          "name": "Identity",
+          "generics": "T",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "value"
+        },
+        {
+          "name": "DefaultValue",
+          "generics": "T",
+          "where_clause": "T: std::default::Default",
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "T::default()"
+        },
+        {
+          "name": "ClonePair",
+          "generics": "T",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "outputs": [
+            { "name": "left", "type_name": "T" },
+            { "name": "right", "type_name": "T" }
+          ],
+          "body": "(value.clone(), value)"
+        },
+        {
+          "name": "IfElse",
+          "generics": "T",
+          "inputs": [
+            { "name": "cond", "type_name": "bool" },
+            { "name": "then_value", "type_name": "T" },
+            { "name": "else_value", "type_name": "T" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "if cond { then_value } else { else_value }"
+        },
+        {
+          "name": "RepeatValue",
+          "generics": "T",
+          "inputs": [
+            { "name": "value", "type_name": "T" },
+            { "name": "count", "type_name": "i32" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "Vec<T>" }],
+          "body": "vec![value; count.max(0) as usize]"
+        }
+      ]
+    },
+    {
+      "name": "Numbers",
+      "stages": [
+        {
+          "name": "Zero",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "<T as num_traits::Zero>::zero()"
+        },
+        {
+          "name": "One",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "<T as num_traits::One>::one()"
+        },
+        {
+          "name": "Add",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "inputs": [
+            { "name": "a", "type_name": "T" },
+            { "name": "b", "type_name": "T" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "a + b"
+        },
+        {
+          "name": "Subtract",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "inputs": [
+            { "name": "a", "type_name": "T" },
+            { "name": "b", "type_name": "T" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "a - b"
+        },
+        {
+          "name": "Multiply",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "inputs": [
+            { "name": "a", "type_name": "T" },
+            { "name": "b", "type_name": "T" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "a * b"
+        },
+        {
+          "name": "Divide",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "inputs": [
+            { "name": "a", "type_name": "T" },
+            { "name": "b", "type_name": "T" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "a / b"
+        },
+        {
+          "name": "Remainder",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "inputs": [
+            { "name": "a", "type_name": "T" },
+            { "name": "b", "type_name": "T" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "a % b"
+        },
+        {
+          "name": "Negate",
+          "generics": "T",
+          "where_clause": "T: num_traits::Signed",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "-value"
+        },
+        {
+          "name": "Abs",
+          "generics": "T",
+          "where_clause": "T: num_traits::Signed",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "num_traits::Signed::abs(&value)"
+        },
+        {
+          "name": "Double",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "value.clone() + value"
+        },
+        {
+          "name": "Square",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "value.clone() * value"
+        },
+        {
+          "name": "Increment",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "value + <T as num_traits::One>::one()"
+        },
+        {
+          "name": "Decrement",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "value - <T as num_traits::One>::one()"
+        },
+        {
+          "name": "Min",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num + PartialOrd",
+          "inputs": [
+            { "name": "a", "type_name": "T" },
+            { "name": "b", "type_name": "T" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "if a < b { a } else { b }"
+        },
+        {
+          "name": "Max",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num + PartialOrd",
+          "inputs": [
+            { "name": "a", "type_name": "T" },
+            { "name": "b", "type_name": "T" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "if a > b { a } else { b }"
+        },
+        {
+          "name": "Clamp",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num + PartialOrd",
+          "inputs": [
+            { "name": "value", "type_name": "T" },
+            { "name": "min", "type_name": "T" },
+            { "name": "max", "type_name": "T" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "num_traits::clamp(value, min, max)"
+        },
+        {
+          "name": "Power",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "inputs": [
+            { "name": "value", "type_name": "T" },
+            { "name": "exp", "type_name": "i32" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "num_traits::pow::pow(value, exp.max(0) as usize)"
+        },
+        {
+          "name": "IsEven",
+          "generics": "T",
+          "where_clause": "T: num_traits::Integer",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "outputs": [{ "name": "out", "type_name": "bool" }],
+          "body": "num_traits::Integer::is_even(&value)"
+        },
+        {
+          "name": "IsPositive",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num + PartialOrd",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "outputs": [{ "name": "out", "type_name": "bool" }],
+          "body": "value > <T as num_traits::Zero>::zero()"
+        }
+      ]
+    },
+    {
+      "name": "Text",
+      "stages": [
+        {
+          "name": "ToString",
+          "generics": "T",
+          "where_clause": "T: std::fmt::Display",
+          "inputs": [{ "name": "value", "type_name": "T" }],
+          "outputs": [{ "name": "out", "type_name": "String" }],
+          "body": "value.to_string()"
+        },
+        {
+          "name": "Upper",
+          "inputs": [{ "name": "text", "type_name": "String" }],
+          "outputs": [{ "name": "out", "type_name": "String" }],
+          "body": "text.to_uppercase()"
+        },
+        {
+          "name": "Lower",
+          "inputs": [{ "name": "text", "type_name": "String" }],
+          "outputs": [{ "name": "out", "type_name": "String" }],
+          "body": "text.to_lowercase()"
+        },
+        {
+          "name": "Trim",
+          "inputs": [{ "name": "text", "type_name": "String" }],
+          "outputs": [{ "name": "out", "type_name": "String" }],
+          "body": "text.trim().to_string()"
+        },
+        {
+          "name": "CharCount",
+          "inputs": [{ "name": "text", "type_name": "String" }],
+          "outputs": [{ "name": "out", "type_name": "usize" }],
+          "body": "text.chars().count()"
+        },
+        {
+          "name": "ByteLength",
+          "inputs": [{ "name": "text", "type_name": "String" }],
+          "outputs": [{ "name": "out", "type_name": "usize" }],
+          "body": "text.len()"
+        },
+        {
+          "name": "Concat",
+          "inputs": [
+            { "name": "a", "type_name": "String" },
+            { "name": "b", "type_name": "String" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "String" }],
+          "body": "format!(\"{}{}\", a, b)"
+        },
+        {
+          "name": "Join",
+          "inputs": [
+            { "name": "values", "type_name": "Vec<String>" },
+            { "name": "separator", "type_name": "String" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "String" }],
+          "body": "values.join(&separator)"
+        },
+        {
+          "name": "SplitWhitespace",
+          "inputs": [{ "name": "text", "type_name": "String" }],
+          "outputs": [{ "name": "out", "type_name": "Vec<String>" }],
+          "body": "text.split_whitespace().map(|s| s.to_string()).collect()"
+        },
+        {
+          "name": "Lines",
+          "inputs": [{ "name": "text", "type_name": "String" }],
+          "outputs": [{ "name": "out", "type_name": "Vec<String>" }],
+          "body": "text.lines().map(|s| s.to_string()).collect()"
+        },
+        {
+          "name": "Replace",
+          "inputs": [
+            { "name": "text", "type_name": "String" },
+            { "name": "from", "type_name": "String" },
+            { "name": "to", "type_name": "String" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "String" }],
+          "body": "text.replace(&from, &to)"
+        },
+        {
+          "name": "Repeat",
+          "inputs": [
+            { "name": "text", "type_name": "String" },
+            { "name": "count", "type_name": "i32" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "String" }],
+          "body": "text.repeat(count.max(0) as usize)"
+        },
+        {
+          "name": "Reverse",
+          "inputs": [{ "name": "text", "type_name": "String" }],
+          "outputs": [{ "name": "out", "type_name": "String" }],
+          "body": "text.chars().rev().collect()"
+        },
+        {
+          "name": "ParseI32",
+          "inputs": [{ "name": "text", "type_name": "String" }],
+          "outputs": [{ "name": "out", "type_name": "i32" }],
+          "body": "text.trim().parse::<i32>().unwrap_or(0)"
+        },
+        {
+          "name": "Greet",
+          "inputs": [{ "name": "name", "type_name": "String" }],
+          "outputs": [{ "name": "out", "type_name": "String" }],
+          "body": "format!(\"Hello, {}!\", name)"
+        }
+      ]
+    },
+    {
+      "name": "Collections",
+      "stages": [
+        {
+          "name": "RangeVec",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num + num_traits::NumCast",
+          "inputs": [{ "name": "count", "type_name": "i32" }],
+          "outputs": [{ "name": "out", "type_name": "Vec<T>" }],
+          "body": "(0..count.max(0)).map(|i| num_traits::cast::cast::<i32, T>(i).unwrap()).collect()"
+        },
+        {
+          "name": "SumVec",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "inputs": [{ "name": "values", "type_name": "Vec<T>" }],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "values.into_iter().fold(<T as num_traits::Zero>::zero(), |acc, x| acc + x)"
+        },
+        {
+          "name": "ProductVec",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "inputs": [{ "name": "values", "type_name": "Vec<T>" }],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "values.into_iter().fold(<T as num_traits::One>::one(), |acc, x| acc * x)"
+        },
+        {
+          "name": "LenVec",
+          "generics": "T",
+          "inputs": [{ "name": "values", "type_name": "Vec<T>" }],
+          "outputs": [{ "name": "out", "type_name": "usize" }],
+          "body": "values.len()"
+        },
+        {
+          "name": "MaxVec",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num + PartialOrd",
+          "inputs": [{ "name": "values", "type_name": "Vec<T>" }],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "values.into_iter().reduce(|a, b| if a > b { a } else { b }).unwrap_or_else(<T as num_traits::Zero>::zero)"
+        },
+        {
+          "name": "MinVec",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num + PartialOrd",
+          "inputs": [{ "name": "values", "type_name": "Vec<T>" }],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "values.into_iter().reduce(|a, b| if a < b { a } else { b }).unwrap_or_else(<T as num_traits::Zero>::zero)"
+        },
+        {
+          "name": "MapDouble",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "inputs": [{ "name": "values", "type_name": "Vec<T>" }],
+          "outputs": [{ "name": "out", "type_name": "Vec<T>" }],
+          "body": "values.into_iter().map(|v| v.clone() + v).collect()"
+        },
+        {
+          "name": "FilterPositive",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num + PartialOrd",
+          "inputs": [{ "name": "values", "type_name": "Vec<T>" }],
+          "outputs": [{ "name": "out", "type_name": "Vec<T>" }],
+          "body": "values.into_iter().filter(|v| *v > <T as num_traits::Zero>::zero()).collect()"
+        },
+        {
+          "name": "FilterEven",
+          "generics": "T",
+          "where_clause": "T: num_traits::Integer",
+          "inputs": [{ "name": "values", "type_name": "Vec<T>" }],
+          "outputs": [{ "name": "out", "type_name": "Vec<T>" }],
+          "body": "values.into_iter().filter(|v| num_traits::Integer::is_even(v)).collect()"
+        },
+        {
+          "name": "ReverseVec",
+          "generics": "T",
+          "inputs": [{ "name": "values", "type_name": "Vec<T>" }],
+          "outputs": [{ "name": "out", "type_name": "Vec<T>" }],
+          "body": "{ let mut out = values; out.reverse(); out }"
+        },
+        {
+          "name": "SortVec",
+          "generics": "T",
+          "where_clause": "T: PartialOrd",
+          "inputs": [{ "name": "values", "type_name": "Vec<T>" }],
+          "outputs": [{ "name": "out", "type_name": "Vec<T>" }],
+          "body": "{ let mut out = values; out.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal)); out }"
+        },
+        {
+          "name": "DedupVec",
+          "generics": "T",
+          "where_clause": "T: PartialOrd",
+          "inputs": [{ "name": "values", "type_name": "Vec<T>" }],
+          "outputs": [{ "name": "out", "type_name": "Vec<T>" }],
+          "body": "{ let mut out = values; out.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal)); out.dedup(); out }"
+        },
+        {
+          "name": "TakeFirst",
+          "generics": "T",
+          "inputs": [
+            { "name": "values", "type_name": "Vec<T>" },
+            { "name": "count", "type_name": "i32" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "Vec<T>" }],
+          "body": "values.into_iter().take(count.max(0) as usize).collect()"
+        },
+        {
+          "name": "SkipFirst",
+          "generics": "T",
+          "inputs": [
+            { "name": "values", "type_name": "Vec<T>" },
+            { "name": "count", "type_name": "i32" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "Vec<T>" }],
+          "body": "values.into_iter().skip(count.max(0) as usize).collect()"
+        },
+        {
+          "name": "ConcatVec",
+          "generics": "T",
+          "inputs": [
+            { "name": "a", "type_name": "Vec<T>" },
+            { "name": "b", "type_name": "Vec<T>" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "Vec<T>" }],
+          "body": "{ let mut out = a; out.extend(b); out }"
+        },
+        {
+          "name": "ZipAdd",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "inputs": [
+            { "name": "a", "type_name": "Vec<T>" },
+            { "name": "b", "type_name": "Vec<T>" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "Vec<T>" }],
+          "body": "a.into_iter().zip(b).map(|(x, y)| x + y).collect()"
+        },
+        {
+          "name": "IndexVec",
+          "generics": "T",
+          "where_clause": "T: num_traits::Num",
+          "inputs": [
+            { "name": "values", "type_name": "Vec<T>" },
+            { "name": "index", "type_name": "i32" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "values.get(index.max(0) as usize).cloned().unwrap_or_else(<T as num_traits::Zero>::zero)"
+        }
+      ]
+    },
+    {
+      "name": "Logic",
+      "stages": [
+        { "name": "TrueOut", "outputs": [{ "name": "out", "type_name": "bool" }], "body": "true" },
+        { "name": "FalseOut", "outputs": [{ "name": "out", "type_name": "bool" }], "body": "false" },
+        {
+          "name": "NotBool",
+          "inputs": [{ "name": "value", "type_name": "bool" }],
+          "outputs": [{ "name": "out", "type_name": "bool" }],
+          "body": "!value"
+        },
+        {
+          "name": "AndBool",
+          "inputs": [
+            { "name": "a", "type_name": "bool" },
+            { "name": "b", "type_name": "bool" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "bool" }],
+          "body": "a && b"
+        },
+        {
+          "name": "OrBool",
+          "inputs": [
+            { "name": "a", "type_name": "bool" },
+            { "name": "b", "type_name": "bool" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "bool" }],
+          "body": "a || b"
+        },
+        {
+          "name": "BoolToNum",
+          "generics": "T",
+          "where_clause": "T: num_traits::Zero + num_traits::One",
+          "inputs": [{ "name": "value", "type_name": "bool" }],
+          "outputs": [{ "name": "out", "type_name": "T" }],
+          "body": "if value { <T as num_traits::One>::one() } else { <T as num_traits::Zero>::zero() }"
+        },
+        {
+          "name": "Eq",
+          "generics": "T",
+          "where_clause": "T: PartialEq",
+          "inputs": [
+            { "name": "a", "type_name": "T" },
+            { "name": "b", "type_name": "T" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "bool" }],
+          "body": "a == b"
+        },
+        {
+          "name": "LessThan",
+          "generics": "T",
+          "where_clause": "T: PartialOrd",
+          "inputs": [
+            { "name": "a", "type_name": "T" },
+            { "name": "b", "type_name": "T" }
+          ],
+          "outputs": [{ "name": "out", "type_name": "bool" }],
+          "body": "a < b"
+        }
+      ]
+    }
+  ]
+}

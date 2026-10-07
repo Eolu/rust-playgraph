@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rust Playgraph</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Tokyo Night palette (matches the Omarchy "Tokyo Night" theme).
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              surface: {
+                DEFAULT: "#1a1b26",
+                deep: "#0e0e14",
+                dark: "#13141c",
+                light: "#24283b",
+              },
+              ink: {
+                DEFAULT: "#a9b1d6",
+                bright: "#c0caf5",
+                dim: "#565f89",
+              },
+              line: {
+                DEFAULT: "#292e42",
+                strong: "#414868",
+              },
+              accent: "#7aa2f7",
+              danger: "#f7768e",
+              success: "#9ece6a",
+              warning: "#e0af68",
+              info: "#7dcfff",
+              purple: "#bb9af7",
+            },
+            fontFamily: {
+              mono: [
+                "JetBrainsMono Nerd Font",
+                "JetBrains Mono",
+                "ui-monospace",
+                "SFMono-Regular",
+                "Menlo",
+                "monospace",
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        background-color: #1a1b26;
+        color: #a9b1d6;
+      }
+      ::selection {
+        background: #7aa2f7;
+        color: #0e0e14;
+      }
+      /* Form controls inherit the theme regardless of utility classes. */
+      input,
+      select,
+      textarea {
+        background-color: #13141c !important;
+        color: #a9b1d6 !important;
+        border-color: #292e42 !important;
+      }
+      input::placeholder,
+      textarea::placeholder {
+        color: #565f89 !important;
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none !important;
+        border-color: #7aa2f7 !important;
+        box-shadow: 0 0 0 1px #7aa2f7 !important;
+      }
+      select option {
+        background-color: #1a1b26;
+        color: #a9b1d6;
+      }
+      /* Utility borders get the theme color unless a color class overrides. */
+      .border,
+      .border-t,
+      .border-b,
+      .border-r,
+      .border-l,
+      .border-2 {
+        border-color: #292e42;
+      }
+      input[type="checkbox"] {
+        accent-color: #7aa2f7;
+      }
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #13141c;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #292e42;
+        border-radius: 5px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #414868;
+      }
+      /* Rust syntax highlighting (Tokyo Night). */
+      .tok-comment {
+        color: #565f89;
+        font-style: italic;
+      }
+      .tok-string {
+        color: #9ece6a;
+      }
+      .tok-number {
+        color: #ff9e64;
+      }
+      .tok-keyword {
+        color: #bb9af7;
+      }
+      .tok-type {
+        color: #2ac3de;
+      }
+      .tok-macro {
+        color: #7dcfff;
+      }
+      .tok-attr {
+        color: #e0af68;
+      }
+      .tok-lifetime {
+        color: #e0af68;
+      }
+      /* Highlighted editor: transparent textarea over a <pre> backdrop. */
+      .code-editor {
+        background-color: #13141c;
+      }
+      .code-editor textarea.code-input,
+      .code-editor pre.code-highlight {
+        position: absolute;
+        inset: 0;
+        margin: 0;
+        padding: 0.5rem;
+        border: 0;
+        font-family: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+        letter-spacing: inherit;
+        tab-size: 4;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+        word-break: break-word;
+      }
+      .code-editor pre.code-highlight {
+        overflow: hidden;
+        pointer-events: none;
+        color: #a9b1d6;
+      }
+      .code-editor textarea.code-input {
+        overflow: auto;
+        resize: none;
+        color: transparent !important;
+        background: transparent !important;
+        caret-color: #c0caf5;
+        outline: none !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+      }
+      .code-editor textarea.code-input::selection {
+        background: rgba(122, 162, 247, 0.3);
+        color: transparent;
+      }
+    </style>
+    <link data-trunk rel="rust" data-wasm-opt="z" />
+  </head>
+  <body class="bg-surface text-ink">
+    <div id="app"></div>
+  </body>
+</html>
