@@ -1,31 +1,13 @@
 # rust-playgraph
 
-A visual playground for the [`directed`](../../directed) graph engine. Write each
+A visual playground for the [`directed`](https://github.com/Eolu/directed) graph engine. Write each
 node as a plain Rust function, compose them on a canvas, and run the graph with
 the real Rust compiler.
 
-![status](https://img.shields.io/badge/status-early-blue)
+![status](https://img.shields.io/badge/status-early-blue)  
 
-## How it works
-
-```
-frontend (Yew/WASM)  ──POST /api/execute──▶  backend (axum)
-   stage editor                                 │  codegen (core)
-   graph canvas                                 ▼
-   output panel                            temp cargo project
-                                           [directed] + generated main.rs
-                                                 │  cargo run
-                                                 ▼
-                                           stdout / stderr / exit code
-```
-
-- **`crates/core`** — the shared model (`Playground`, `StageDef`, `GraphNode`,
-  `Edge`), signature parsing via `syn`, and code generation. `generate()` turns a
-  document into one runnable `main.rs` that uses the real `directed` crate.
-- **`crates/backend`** — an axum service exposing `/api/generate` and
-  `/api/execute`. Execution writes a throwaway crate to a temp dir and shells out
-  to `cargo run`, so node code is genuine Rust.
-- **`crates/frontend`** — the Yew single-page editor.
+This largely exists as a demo project to show what `directed` can do. But if I discover a more
+prudent use of it I might be willing to expand it down one path or another.  
 
 ## Stage model
 
