@@ -4,7 +4,7 @@ A visual playground for the [`directed`](https://github.com/Eolu/directed) graph
 node as a plain Rust function, compose them on a canvas, and run the graph with
 the real Rust compiler.
 
-![status](https://img.shields.io/badge/status-early-blue)  
+![example](./example.png)  
 
 This largely exists as a demo project to show what `directed` can do. But if I discover a more
 prudent use of it I might be willing to expand it down one path or another.  
@@ -82,9 +82,14 @@ The root `Trunk.toml` points Trunk at `crates/frontend`, so `trunk serve` works
 from either location. The backend does **not** serve the UI — it only exposes
 `/api/*`; load the app from the Trunk dev server.
 
-The backend locates the `directed` crate next to this repository by default.
-Override with `DIRECTED_PATH=/path/to/directed/directed`. Compiled artifacts are
-cached in `.playgraph-cache/` so `directed` is built only once.
+The generated program depends on the published
+[`directed`](https://crates.io/crates/directed) crate, so an installed backend
+only needs a Rust toolchain (plus crates.io access on the first run). When run
+from this repository the sibling `directed` checkout is used automatically, so
+local changes are picked up; set `DIRECTED_PATH=/path/to/directed/directed` to
+point at a different checkout. Compiled artifacts are cached in
+`.playgraph-cache/` during development, or in a per-user cache directory when the
+backend is installed.
 
 ## Security
 

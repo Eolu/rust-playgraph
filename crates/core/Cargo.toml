@@ -4,6 +4,12 @@ description = "Data model and code generation for rust-playgraph"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+rust-version.workspace = true
+keywords = ["graph", "dag", "codegen", "playground", "directed"]
+categories = ["development-tools", "data-structures", "visualization"]
 
 [dependencies]
 serde.workspace = true

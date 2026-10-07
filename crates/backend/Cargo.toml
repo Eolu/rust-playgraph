@@ -4,13 +4,19 @@ description = "Compile-and-run service for rust-playgraph"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+rust-version.workspace = true
+keywords = ["graph", "codegen", "playground", "axum", "rust"]
+categories = ["development-tools", "web-programming::http-server"]
 
 [[bin]]
 name = "playgraph-backend"
 path = "src/main.rs"
 
 [dependencies]
-playgraph-core = { path = "../core" }
+playgraph-core.workspace = true
 axum = "0.7"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "process", "time", "fs"] }
 tower-http = { version = "0.5", features = ["cors"] }

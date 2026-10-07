@@ -1,11 +1,12 @@
 //! A small HTTP service that turns a [`Playground`] into a Rust program, runs
 //! it with `cargo`, and returns the output.
 //!
-//! The service shells out to the system toolchain, so the machine running the
-//! backend needs a Rust toolchain and the `directed` crate available (see
-//! `DIRECTED_PATH`).
+//! The generated program depends on the published `directed` crate, so the
+//! machine running the backend only needs a Rust toolchain and network access
+//! to crates.io. During development the sibling `directed` checkout is used
+//! automatically, and `DIRECTED_PATH` overrides that with an explicit path.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Stdio;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
@@ -20,6 +21,9 @@ use tower_http::cors::CorsLayer;
 
 const EXECUTE_TIMEOUT: Duration = Duration::from_secs(180);
 
+/// The published `directed` version used when no local checkout is available.
+const DIRECTED_VERSION: &str = "0.4";
+
 #[tokio::main]
 async fn main() {
     let app = Router::new()
@@ -33,7 +37,7 @@ async fn main() {
         .await
         .expect("failed to bind address");
     println!("playgraph-backend listening on http://{addr}");
-    println!("using directed crate at {}", directed_path().display());
+    println!("directed dependency: {}", directed_dependency());
     axum::serve(listener, app).await.expect("server failed");
 }
 
@@ -68,14 +72,6 @@ async fn execute(playground: Playground) -> ExecuteResponse {
 }
 
 async fn compile_and_run(generated: &str) -> Result<ExecuteResponse, String> {
-    let directed = directed_path();
-    if !directed.join("Cargo.toml").exists() {
-        return Err(format!(
-            "directed crate not found at {} (set DIRECTED_PATH)",
-            directed.display()
-        ));
-    }
-
     let dir = temp_dir();
     tokio::fs::create_dir_all(dir.join("src"))
         .await
@@ -87,9 +83,9 @@ async fn compile_and_run(generated: &str) -> Result<ExecuteResponse, String> {
     } else {
         ""
     };
+    let directed = directed_dependency();
     let manifest = format!(
-        "[package]\nname = \"playgraph-run\"\nversion = \"0.0.0\"\nedition = \"2024\"\n\n[dependencies]\ndirected = {{ path = {:?} }}\n{num_traits}\n[workspace]\n",
-        directed.display().to_string()
+        "[package]\nname = \"playgraph-run\"\nversion = \"0.0.0\"\nedition = \"2024\"\n\n[dependencies]\n{directed}\n{num_traits}\n[workspace]\n"
     );
     tokio::fs::write(dir.join("Cargo.toml"), manifest)
         .await
@@ -142,12 +138,29 @@ async fn compile_and_run(generated: &str) -> Result<ExecuteResponse, String> {
     })
 }
 
-/// The `directed` crate used by generated code. Override with `DIRECTED_PATH`.
-fn directed_path() -> PathBuf {
-    if let Ok(path) = std::env::var("DIRECTED_PATH") {
-        return PathBuf::from(path);
+/// The `directed` dependency line for the generated crate's manifest.
+///
+/// `DIRECTED_PATH` wins if set. Otherwise a sibling `directed` checkout (as in
+/// this repository) is used so local changes are picked up; when the backend is
+/// installed from crates.io there is no sibling, so the published `directed`
+/// version is used and no setup is required.
+fn directed_dependency() -> String {
+    let override_path = std::env::var("DIRECTED_PATH").ok();
+    let sibling = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../directed/directed");
+    directed_dependency_for(override_path.as_deref(), &sibling)
+}
+
+fn directed_dependency_for(override_path: Option<&str>, sibling: &Path) -> String {
+    if let Some(path) = override_path {
+        return format!("directed = {{ path = {path:?} }}");
     }
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../directed/directed")
+    if sibling.join("Cargo.toml").exists() {
+        return format!(
+            "directed = {{ path = {:?} }}",
+            sibling.display().to_string()
+        );
+    }
+    format!("directed = {DIRECTED_VERSION:?}")
 }
 
 /// Shared cargo target directory, so `directed` is compiled only once.
@@ -155,7 +168,28 @@ fn cache_dir() -> PathBuf {
     if let Ok(dir) = std::env::var("PLAYGRAPH_CACHE") {
         return PathBuf::from(dir);
     }
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../.playgraph-cache")
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    // In a source checkout, keep the cache next to the workspace.
+    if manifest_dir.join("../../Cargo.toml").exists() {
+        return manifest_dir.join("../../.playgraph-cache");
+    }
+    // Installed from crates.io: the registry source tree is not a good place
+    // for build artifacts, so use a per-user cache directory.
+    user_cache_dir().join("playgraph")
+}
+
+fn user_cache_dir() -> PathBuf {
+    if let Ok(dir) = std::env::var("XDG_CACHE_HOME") {
+        return PathBuf::from(dir);
+    }
+    #[cfg(windows)]
+    if let Ok(dir) = std::env::var("LOCALAPPDATA") {
+        return PathBuf::from(dir);
+    }
+    if let Ok(home) = std::env::var("HOME") {
+        return PathBuf::from(home).join(".cache");
+    }
+    std::env::temp_dir()
 }
 
 fn temp_dir() -> PathBuf {
@@ -164,4 +198,35 @@ fn temp_dir() -> PathBuf {
         .map(|duration| duration.as_nanos())
         .unwrap_or(0);
     std::env::temp_dir().join(format!("playgraph-{}-{nanos}", std::process::id()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn explicit_path_wins() {
+        let missing = Path::new("/nonexistent/directed");
+        assert_eq!(
+            directed_dependency_for(Some("/opt/directed"), missing),
+            "directed = { path = \"/opt/directed\" }"
+        );
+    }
+
+    #[test]
+    fn falls_back_to_registry_without_a_checkout() {
+        let missing = Path::new("/nonexistent/directed");
+        assert_eq!(
+            directed_dependency_for(None, missing),
+            format!("directed = {DIRECTED_VERSION:?}")
+        );
+    }
+
+    #[test]
+    fn uses_the_sibling_checkout_when_present() {
+        let sibling = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../directed/directed");
+        if sibling.join("Cargo.toml").exists() {
+            assert!(directed_dependency_for(None, &sibling).contains("path"));
+        }
+    }
 }
